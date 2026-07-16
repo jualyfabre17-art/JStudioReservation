@@ -39,7 +39,6 @@ namespace JStudioReservation.Application.Services
             if (!validation.Success)
                 return ServiceResult<Room>.Fail(validation.Message);
 
-            // Verificar que el artista existe
             var artist = await _artistRepository.GetByIdAsync(entity.ArtistId);
             if (artist == null)
                 return ServiceResult<Room>.Fail($"Artist with ID {entity.ArtistId} not found.");
@@ -66,7 +65,6 @@ namespace JStudioReservation.Application.Services
             if (room == null)
                 return ServiceResult<bool>.Fail($"Room with ID {id} not found.");
 
-            // Verificar si tiene reservas activas
             var hasActiveBookings = room.Bookings.Any(b => b.Status != "Cancelled" && b.Status != "Completed");
             if (hasActiveBookings)
                 return ServiceResult<bool>.Fail("Cannot delete room with active bookings.");
