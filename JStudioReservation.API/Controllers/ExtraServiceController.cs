@@ -1,8 +1,7 @@
-﻿using JStudioReservation.API.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using JStudioReservation.Domain.Entities;
 using JStudioReservation.API.DTOs;
-using JStudioReservation.API.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using JStudioReservation.Infrastructure.Repositories;
 
 namespace JStudioReservation.API.Controllers
 {
@@ -10,105 +9,158 @@ namespace JStudioReservation.API.Controllers
     [ApiController]
     public class ExtraServiceController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ExtraServiceRepository _extraServiceRepository;
+        private readonly RoomRepository _roomRepository;
 
-        public ExtraServiceController(ApplicationDbContext context)
+        public ExtraServiceController(ExtraServiceRepository extraServiceRepository, RoomRepository roomRepository)
         {
-            _context = context;
+            _extraServiceRepository = extraServiceRepository;
+            _roomRepository = roomRepository;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ExtraServiceDTO>>> GetExtraServices()
         {
-            var extraServices = await _context.ExtraServices
-                .Select(es => new ExtraServiceDTO
-                {
-                    Id = es.Id,
-                    Name = es.Name,
-                    Price = es.Price,
-                    RoomId = es.RoomId
-                })
-                .ToListAsync();
-
-            return Ok(extraServices);
+            var services = await _extraServiceRepository.GetAllServicesWithDetailsAsync();
+            var serviceDTOs = services.Select(s => new ExtraServiceDTO
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Price = s.Price,
+                RoomId = s.RoomId,
+                RoomName = s.Room?.Name
+            });
+            return Ok(serviceDTOs);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ExtraServiceDTO>> GetExtraService(int id)
         {
-            var extraService = await _context.ExtraServices.FindAsync(id);
-
-            if (extraService == null)
+            var service = await _extraServiceRepository.GetServiceWithDetailsAsync(id);
+            if (service == null)
                 return NotFound();
 
-            var dto = new ExtraServiceDTO
+            var serviceDTO = new ExtraServiceDTO
             {
-                Id = extraService.Id,
-                Name = extraService.Name,
-                Price = extraService.Price,
-                RoomId = extraService.RoomId
+                Id = service.Id,
+                Name = service.Name,
+                Price = service.Price,
+                RoomId = service.RoomId,
+                RoomName = service.Room?.Name
             };
+            return Ok(serviceDTO);
+        }
 
-            return Ok(dto);
+        [HttpGet("room/{roomId}")]
+        public async Task<ActionResult<IEnumerable<ExtraServiceDTO>>> GetServicesByRoom(int roomId)
+        {
+            var services = await _extraServiceRepository.GetServicesByRoomAsync(roomId);
+            var serviceDTOs = services.Select(s => new ExtraServiceDTO
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Price = s.Price,
+                RoomId = s.RoomId,
+                RoomName = s.Room?.Name
+            });
+            return Ok(serviceDTOs);
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<ExtraServiceDTO>>> SearchServices([FromQuery] string term)
+        {
+            var services = await _extraServiceRepository.SearchServicesByNameAsync(term);
+            var serviceDTOs = services.Select(s => new ExtraServiceDTO
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Price = s.Price,
+                RoomId = s.RoomId,
+                RoomName = s.Room?.Name
+            });
+            return Ok(serviceDTOs);
+        }
+
+        [HttpGet("price-range")]
+        public async Task<ActionResult<IEnumerable<ExtraServiceDTO>>> GetServicesByPriceRange(
+            [FromQuery] decimal minPrice,
+            [FromQuery] decimal maxPrice)
+        {
+            var services = await _extraServiceRepository.GetServicesByPriceRangeAsync(minPrice, maxPrice);
+            var serviceDTOs = services.Select(s => new ExtraServiceDTO
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Price = s.Price,
+                RoomId = s.RoomId,
+                RoomName = s.Room?.Name
+            });
+            return Ok(serviceDTOs);
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateExtraService(CreateExtraServiceDTO dto)
+        public async Task<ActionResult<ExtraServiceDTO>> CreateExtraService([FromBody] CreateExtraServiceDTO createDTO)
         {
-            var roomExists = await _context.Rooms
-                .AnyAsync(r => r.Id == dto.RoomId);
+            var room = await _roomRepository.GetByIdAsync(createDTO.RoomId);
+            if (room == null)
+                return BadRequest($"Room with ID {createDTO.RoomId} not found");
 
-            if (!roomExists)
-                return BadRequest("The selected room does not exist.");
-
-            ExtraService extraService = new ExtraService
+            var service = new ExtraService
             {
-                Name = dto.Name,
-                Price = dto.Price,
-                RoomId = dto.RoomId
+                Name = createDTO.Name,
+                Price = createDTO.Price,
+                RoomId = createDTO.RoomId
             };
 
-            _context.ExtraServices.Add(extraService);
+            await _extraServiceRepository.AddAsync(service);
+            await _extraServiceRepository.SaveChangesAsync();
 
-            await _context.SaveChangesAsync();
+            var serviceDTO = new ExtraServiceDTO
+            {
+                Id = service.Id,
+                Name = service.Name,
+                Price = service.Price,
+                RoomId = service.RoomId,
+                RoomName = room.Name
+            };
 
-            return Ok(extraService);
+            return CreatedAtAction(nameof(GetExtraService), new { id = service.Id }, serviceDTO);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateExtraService(int id, CreateExtraServiceDTO dto)
+        public async Task<IActionResult> UpdateExtraService(int id, [FromBody] CreateExtraServiceDTO updateDTO)
         {
-            var extraService = await _context.ExtraServices.FindAsync(id);
-
-            if (extraService == null)
+            var service = await _extraServiceRepository.GetServiceWithDetailsAsync(id);
+            if (service == null)
                 return NotFound();
 
-            var roomExists = await _context.Rooms
-                .AnyAsync(r => r.Id == dto.RoomId);
+            var room = await _roomRepository.GetByIdAsync(updateDTO.RoomId);
+            if (room == null)
+                return BadRequest($"Room with ID {updateDTO.RoomId} not found");
 
-            if (!roomExists)
-                return BadRequest("The selected room does not exist.");
+            service.Name = updateDTO.Name;
+            service.Price = updateDTO.Price;
+            service.RoomId = updateDTO.RoomId;
 
-            extraService.Name = dto.Name;
-            extraService.Price = dto.Price;
-            extraService.RoomId = dto.RoomId;
-
-            await _context.SaveChangesAsync();
+            _extraServiceRepository.Update(service);
+            await _extraServiceRepository.SaveChangesAsync();
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteExtraService(int id)
+        public async Task<IActionResult> DeleteExtraService(int id)
         {
-            var extraService = await _context.ExtraServices.FindAsync(id);
-
-            if (extraService == null)
+            var service = await _extraServiceRepository.GetServiceWithDetailsAsync(id);
+            if (service == null)
                 return NotFound();
 
-            _context.ExtraServices.Remove(extraService);
+            var isInActiveBooking = await _extraServiceRepository.IsServiceInActiveBookingAsync(id);
+            if (isInActiveBooking)
+                return BadRequest("Cannot delete service that is being used in active bookings");
 
-            await _context.SaveChangesAsync();
+            _extraServiceRepository.Delete(service);
+            await _extraServiceRepository.SaveChangesAsync();
 
             return NoContent();
         }

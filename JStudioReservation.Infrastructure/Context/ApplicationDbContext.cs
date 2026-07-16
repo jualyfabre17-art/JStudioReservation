@@ -1,7 +1,7 @@
-﻿using JStudioReservation.API.Entities;
+﻿using JStudioReservation.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace JStudioReservation.API.Data
+namespace JStudioReservation.Infrastructure.Context
 {
     public class ApplicationDbContext : DbContext
     {
