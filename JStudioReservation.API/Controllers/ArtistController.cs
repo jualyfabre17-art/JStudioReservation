@@ -1,8 +1,7 @@
-﻿using JStudioReservation.API.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using JStudioReservation.Domain.Entities;
 using JStudioReservation.API.DTOs;
-using JStudioReservation.API.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using JStudioReservation.Infrastructure.Repositories;
 
 namespace JStudioReservation.API.Controllers
 {
@@ -10,38 +9,89 @@ namespace JStudioReservation.API.Controllers
     [ApiController]
     public class ArtistController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ArtistRepository _artistRepository;
 
-        public ArtistController(ApplicationDbContext context)
+        public ArtistController(ArtistRepository artistRepository)
         {
-            _context = context;
+            _artistRepository = artistRepository;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ArtistDTO>>> GetArtists()
         {
-            var artists = await _context.Artists
-                .Select(a => new ArtistDTO
-                {
-                    Id = a.Id,
-                    FullName = a.FullName,
-                    Genre = a.Genre,
-                    PhoneNumber = a.PhoneNumber
-                })
-                .ToListAsync();
-
-            return Ok(artists);
+            var artists = await _artistRepository.GetAllAsync();
+            var artistDTOs = artists.Select(a => new ArtistDTO
+            {
+                Id = a.Id,
+                FullName = a.FullName,
+                Genre = a.Genre,
+                PhoneNumber = a.PhoneNumber
+            });
+            return Ok(artistDTOs);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ArtistDTO>> GetArtist(int id)
         {
-            var artist = await _context.Artists.FindAsync(id);
-
+            var artist = await _artistRepository.GetByIdAsync(id);
             if (artist == null)
                 return NotFound();
 
-            var dto = new ArtistDTO
+            var artistDTO = new ArtistDTO
+            {
+                Id = artist.Id,
+                FullName = artist.FullName,
+                Genre = artist.Genre,
+                PhoneNumber = artist.PhoneNumber
+            };
+            return Ok(artistDTO);
+        }
+
+        [HttpGet("genre/{genre}")]
+        public async Task<ActionResult<IEnumerable<ArtistDTO>>> GetArtistsByGenre(string genre)
+        {
+            var artists = await _artistRepository.GetByGenreAsync(genre);
+            var artistDTOs = artists.Select(a => new ArtistDTO
+            {
+                Id = a.Id,
+                FullName = a.FullName,
+                Genre = a.Genre,
+                PhoneNumber = a.PhoneNumber
+            });
+            return Ok(artistDTOs);
+        }
+
+        [HttpGet("{id}/details")]
+        public async Task<ActionResult<ArtistDTO>> GetArtistWithDetails(int id)
+        {
+            var artist = await _artistRepository.GetArtistWithDetailsAsync(id);
+            if (artist == null)
+                return NotFound();
+
+            var artistDTO = new ArtistDTO
+            {
+                Id = artist.Id,
+                FullName = artist.FullName,
+                Genre = artist.Genre,
+                PhoneNumber = artist.PhoneNumber
+            };
+            return Ok(artistDTO);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<ArtistDTO>> CreateArtist([FromBody] CreateArtistDTO createArtistDTO)
+        {
+            var artist = new Artist
+            {
+                FullName = createArtistDTO.FullName,
+                Genre = createArtistDTO.Genre,
+                PhoneNumber = createArtistDTO.PhoneNumber
+            };
+
+            await _artistRepository.AddAsync(artist);
+            await _artistRepository.SaveChangesAsync();
+
+            var artistDTO = new ArtistDTO
             {
                 Id = artist.Id,
                 FullName = artist.FullName,
@@ -49,54 +99,35 @@ namespace JStudioReservation.API.Controllers
                 PhoneNumber = artist.PhoneNumber
             };
 
-            return Ok(dto);
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> CreateArtist(CreateArtistDTO dto)
-        {
-            Artist artist = new Artist
-            {
-                FullName = dto.FullName,
-                Genre = dto.Genre,
-                PhoneNumber = dto.PhoneNumber
-            };
-
-            _context.Artists.Add(artist);
-
-            await _context.SaveChangesAsync();
-
-            return Ok(artist);
+            return CreatedAtAction(nameof(GetArtist), new { id = artist.Id }, artistDTO);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateArtist(int id, CreateArtistDTO dto)
+        public async Task<IActionResult> UpdateArtist(int id, [FromBody] CreateArtistDTO updateArtistDTO)
         {
-            var artist = await _context.Artists.FindAsync(id);
-
+            var artist = await _artistRepository.GetByIdAsync(id);
             if (artist == null)
                 return NotFound();
 
-            artist.FullName = dto.FullName;
-            artist.Genre = dto.Genre;
-            artist.PhoneNumber = dto.PhoneNumber;
+            artist.FullName = updateArtistDTO.FullName;
+            artist.Genre = updateArtistDTO.Genre;
+            artist.PhoneNumber = updateArtistDTO.PhoneNumber;
 
-            await _context.SaveChangesAsync();
+            _artistRepository.Update(artist);
+            await _artistRepository.SaveChangesAsync();
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteArtist(int id)
+        public async Task<IActionResult> DeleteArtist(int id)
         {
-            var artist = await _context.Artists.FindAsync(id);
-
+            var artist = await _artistRepository.GetByIdAsync(id);
             if (artist == null)
                 return NotFound();
 
-            _context.Artists.Remove(artist);
-
-            await _context.SaveChangesAsync();
+            _artistRepository.Delete(artist);
+            await _artistRepository.SaveChangesAsync();
 
             return NoContent();
         }

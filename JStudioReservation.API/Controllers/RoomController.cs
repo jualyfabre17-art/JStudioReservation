@@ -1,8 +1,7 @@
-﻿using JStudioReservation.API.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using JStudioReservation.Domain.Entities;
 using JStudioReservation.API.DTOs;
-using JStudioReservation.API.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using JStudioReservation.Infrastructure.Repositories;
 
 namespace JStudioReservation.API.Controllers
 {
@@ -10,109 +9,177 @@ namespace JStudioReservation.API.Controllers
     [ApiController]
     public class RoomController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly RoomRepository _roomRepository;
+        private readonly ArtistRepository _artistRepository;
 
-        public RoomController(ApplicationDbContext context)
+        public RoomController(RoomRepository roomRepository, ArtistRepository artistRepository)
         {
-            _context = context;
+            _roomRepository = roomRepository;
+            _artistRepository = artistRepository;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRooms()
         {
-            var rooms = await _context.Rooms
-                .Select(r => new RoomDTO
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Capacity = r.Capacity,
-                    PricePerHour = r.PricePerHour,
-                    ArtistId = r.ArtistId
-                })
-                .ToListAsync();
-
-            return Ok(rooms);
+            var rooms = await _roomRepository.GetAllRoomsWithDetailsAsync();
+            var roomDTOs = rooms.Select(r => new RoomDTO
+            {
+                Id = r.Id,
+                Name = r.Name,
+                PricePerHour = r.PricePerHour,
+                Capacity = r.Capacity,
+                ArtistId = r.ArtistId,
+                ArtistName = r.Artist?.FullName
+            });
+            return Ok(roomDTOs);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<RoomDTO>> GetRoom(int id)
         {
-            var room = await _context.Rooms.FindAsync(id);
-
+            var room = await _roomRepository.GetRoomWithDetailsAsync(id);
             if (room == null)
                 return NotFound();
 
-            var dto = new RoomDTO
+            var roomDTO = new RoomDTO
             {
                 Id = room.Id,
                 Name = room.Name,
-                Capacity = room.Capacity,
                 PricePerHour = room.PricePerHour,
-                ArtistId = room.ArtistId
+                Capacity = room.Capacity,
+                ArtistId = room.ArtistId,
+                ArtistName = room.Artist?.FullName
             };
+            return Ok(roomDTO);
+        }
 
-            return Ok(dto);
+        [HttpGet("artist/{artistId}")]
+        public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRoomsByArtist(int artistId)
+        {
+            var rooms = await _roomRepository.GetRoomsByArtistAsync(artistId);
+            var roomDTOs = rooms.Select(r => new RoomDTO
+            {
+                Id = r.Id,
+                Name = r.Name,
+                PricePerHour = r.PricePerHour,
+                Capacity = r.Capacity,
+                ArtistId = r.ArtistId,
+                ArtistName = r.Artist?.FullName
+            });
+            return Ok(roomDTOs);
+        }
+
+        [HttpGet("available")]
+        public async Task<ActionResult<IEnumerable<RoomDTO>>> GetAvailableRooms(
+            [FromQuery] DateTime startTime,
+            [FromQuery] DateTime endTime)
+        {
+            var rooms = await _roomRepository.GetAvailableRoomsAsync(startTime, endTime);
+            var roomDTOs = rooms.Select(r => new RoomDTO
+            {
+                Id = r.Id,
+                Name = r.Name,
+                PricePerHour = r.PricePerHour,
+                Capacity = r.Capacity,
+                ArtistId = r.ArtistId
+            });
+            return Ok(roomDTOs);
+        }
+
+        [HttpGet("price-range")]
+        public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRoomsByPriceRange(
+            [FromQuery] decimal minPrice,
+            [FromQuery] decimal maxPrice)
+        {
+            var rooms = await _roomRepository.GetRoomsByPriceRangeAsync(minPrice, maxPrice);
+            var roomDTOs = rooms.Select(r => new RoomDTO
+            {
+                Id = r.Id,
+                Name = r.Name,
+                PricePerHour = r.PricePerHour,
+                Capacity = r.Capacity,
+                ArtistId = r.ArtistId,
+                ArtistName = r.Artist?.FullName
+            });
+            return Ok(roomDTOs);
+        }
+
+        [HttpGet("check-availability")]
+        public async Task<ActionResult<bool>> CheckRoomAvailability(
+            [FromQuery] int roomId,
+            [FromQuery] DateTime startTime,
+            [FromQuery] DateTime endTime)
+        {
+            var isAvailable = await _roomRepository.IsRoomAvailableAsync(roomId, startTime, endTime);
+            return Ok(isAvailable);
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateRoom(CreateRoomDTO dto)
+        public async Task<ActionResult<RoomDTO>> CreateRoom([FromBody] CreateRoomDTO createRoomDTO)
         {
-            var artistExists = await _context.Artists
-                .AnyAsync(a => a.Id == dto.ArtistId);
+            var artist = await _artistRepository.GetByIdAsync(createRoomDTO.ArtistId);
+            if (artist == null)
+                return BadRequest($"Artist with ID {createRoomDTO.ArtistId} not found");
 
-            if (!artistExists)
-                return BadRequest("The selected artist does not exist.");
-
-            Room room = new Room
+            var room = new Room
             {
-                Name = dto.Name,
-                Capacity = dto.Capacity,
-                PricePerHour = dto.PricePerHour,
-                ArtistId = dto.ArtistId
+                Name = createRoomDTO.Name,
+                PricePerHour = createRoomDTO.PricePerHour,
+                Capacity = createRoomDTO.Capacity,
+                ArtistId = createRoomDTO.ArtistId
             };
 
-            _context.Rooms.Add(room);
+            await _roomRepository.AddAsync(room);
+            await _roomRepository.SaveChangesAsync();
 
-            await _context.SaveChangesAsync();
+            var roomDTO = new RoomDTO
+            {
+                Id = room.Id,
+                Name = room.Name,
+                PricePerHour = room.PricePerHour,
+                Capacity = room.Capacity,
+                ArtistId = room.ArtistId,
+                ArtistName = artist.FullName
+            };
 
-            return Ok(room);
+            return CreatedAtAction(nameof(GetRoom), new { id = room.Id }, roomDTO);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateRoom(int id, CreateRoomDTO dto)
+        public async Task<IActionResult> UpdateRoom(int id, [FromBody] CreateRoomDTO updateRoomDTO)
         {
-            var room = await _context.Rooms.FindAsync(id);
-
+            var room = await _roomRepository.GetByIdAsync(id);
             if (room == null)
                 return NotFound();
 
-            var artistExists = await _context.Artists
-                .AnyAsync(a => a.Id == dto.ArtistId);
+            var artist = await _artistRepository.GetByIdAsync(updateRoomDTO.ArtistId);
+            if (artist == null)
+                return BadRequest($"Artist with ID {updateRoomDTO.ArtistId} not found");
 
-            if (!artistExists)
-                return BadRequest("The selected artist does not exist.");
+            room.Name = updateRoomDTO.Name;
+            room.PricePerHour = updateRoomDTO.PricePerHour;
+            room.Capacity = updateRoomDTO.Capacity;
+            room.ArtistId = updateRoomDTO.ArtistId;
 
-            room.Name = dto.Name;
-            room.Capacity = dto.Capacity;
-            room.PricePerHour = dto.PricePerHour;
-            room.ArtistId = dto.ArtistId;
-
-            await _context.SaveChangesAsync();
+            _roomRepository.Update(room);
+            await _roomRepository.SaveChangesAsync();
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteRoom(int id)
+        public async Task<IActionResult> DeleteRoom(int id)
         {
-            var room = await _context.Rooms.FindAsync(id);
-
+            var room = await _roomRepository.GetRoomWithDetailsAsync(id);
             if (room == null)
                 return NotFound();
 
-            _context.Rooms.Remove(room);
+            var hasActiveBookings = room.Bookings.Any(b => b.Status != "Cancelled" && b.Status != "Completed");
+            if (hasActiveBookings)
+                return BadRequest("Cannot delete room with active bookings");
 
-            await _context.SaveChangesAsync();
+            _roomRepository.Delete(room);
+            await _roomRepository.SaveChangesAsync();
 
             return NoContent();
         }

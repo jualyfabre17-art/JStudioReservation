@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace JStudioReservation.API.Migrations
+namespace JStudioReservation.Infrastructure.Context
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

@@ -15,5 +15,11 @@
         public DateTime EndTime { get; set; }
 
         public string Status { get; set; } = string.Empty;
+
+        public string? ArtistName { get; set; }
+
+        public string? RoomName { get; set; }
+
+        public string? ExtraServiceName { get; set; }
     }
 }
