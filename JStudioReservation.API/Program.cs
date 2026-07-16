@@ -1,14 +1,16 @@
 using Microsoft.EntityFrameworkCore;
-using JStudioReservation.API.Data;
+using JStudioReservation.Infrastructure.Context;
+using JStudioReservation.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<ArtistRepository>();
+builder.Services.AddScoped<RoomRepository>();
+builder.Services.AddScoped<ExtraServiceRepository>();
+builder.Services.AddScoped<BookingRepository>();
 
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen();
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(
@@ -29,5 +31,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors("AllowAll");
 
 app.Run();

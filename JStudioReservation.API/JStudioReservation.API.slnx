@@ -1,3 +1,5 @@
 <Solution>
+  <Project Path="../JStudioReservation.Domain/JStudioReservation.Domain.csproj" Id="139bb50c-bf03-4482-8999-d26deb58d63d" />
+  <Project Path="../JStudioReservation.Infrastructure/JStudioReservation.Infrastructure.csproj" Id="2af070fa-1a39-40f7-a622-9182c89cd0d9" />
   <Project Path="JStudioReservation.API.csproj" />
 </Solution>

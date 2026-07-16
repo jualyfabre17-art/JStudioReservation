@@ -1,12 +1,10 @@
-﻿namespace JStudioReservation.API.Entities
+﻿using JStudioReservation.Domain.Core;
 
+namespace JStudioReservation.Domain.Entities
 {
-    public class ExtraService
+    public class ExtraService : BaseEntity
     {
-        public int Id { get; set; }
-
         public string Name { get; set; } = string.Empty;
-
         public decimal Price { get; set; }
         public int RoomId { get; set; }
         public Room Room { get; set; } = null!;
