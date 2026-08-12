@@ -68,7 +68,8 @@ namespace JStudioReservation.API.Controllers
                 Name = dto.Name,
                 Capacity = dto.Capacity,
                 PricePerHour = dto.PricePerHour,
-                ArtistId = dto.ArtistId
+                ArtistId = dto.ArtistId,
+                CreatedAt = DateTime.UtcNow
             };
 
             _context.Rooms.Add(room);

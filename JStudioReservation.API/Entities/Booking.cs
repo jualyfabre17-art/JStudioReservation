@@ -19,5 +19,7 @@
         public Room Room { get; set; } = null!;
 
         public ExtraService? ExtraService { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

@@ -11,6 +11,9 @@
         public int Capacity { get; set; }
         public int ArtistId { get; set; }
         public Artist Artist { get; set; } = null!;
+
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public ICollection<ExtraService> ExtraServices { get; set; } = new List<ExtraService>();
 
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();

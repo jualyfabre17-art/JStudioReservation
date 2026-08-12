@@ -65,7 +65,8 @@ namespace JStudioReservation.API.Controllers
             {
                 Name = dto.Name,
                 Price = dto.Price,
-                RoomId = dto.RoomId
+                RoomId = dto.RoomId,
+                CreatedAt = DateTime.UtcNow
             };
 
             _context.ExtraServices.Add(extraService);

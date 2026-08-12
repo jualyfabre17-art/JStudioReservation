@@ -80,7 +80,8 @@ namespace JStudioReservation.API.Controllers
                 ExtraServiceId = dto.ExtraServiceId,
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
-                Status = dto.Status
+                Status = dto.Status,
+                CreatedAt = DateTime.UtcNow
             };
 
             _context.Bookings.Add(booking);

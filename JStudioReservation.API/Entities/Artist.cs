@@ -9,6 +9,8 @@
         public string Genre { get; set; } = string.Empty;
 
         public string PhoneNumber { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } 
+        public DateTime? UpdatedAt { get; set; }
 
         public ICollection<Room> Rooms { get; set; } = new List<Room>();
 
