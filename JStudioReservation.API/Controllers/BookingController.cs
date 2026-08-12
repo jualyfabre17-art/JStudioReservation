@@ -233,29 +233,13 @@ namespace JStudioReservation.API.Controllers
 
             var booking = new Booking
             {
-                ArtistId = createDTO.ArtistId,
-                RoomId = createDTO.RoomId,
-                ExtraServiceId = createDTO.ExtraServiceId,
-                StartTime = createDTO.StartTime,
-                EndTime = createDTO.EndTime,
-                Status = createDTO.Status ?? "Pending"
-            };
-
-            await _bookingRepository.AddAsync(booking);
-            await _bookingRepository.SaveChangesAsync();
-
-            var bookingDTO = new BookingDTO
-            {
-                Id = booking.Id,
-                ArtistId = booking.ArtistId,
-                ArtistName = artist.FullName,
-                RoomId = booking.RoomId,
-                RoomName = room.Name,
-                ExtraServiceId = booking.ExtraServiceId,
-                ExtraServiceName = booking.ExtraService?.Name,
-                StartTime = booking.StartTime,
-                EndTime = booking.EndTime,
-                Status = booking.Status
+                ArtistId = dto.ArtistId,
+                RoomId = dto.RoomId,
+                ExtraServiceId = dto.ExtraServiceId,
+                StartTime = dto.StartTime,
+                EndTime = dto.EndTime,
+                Status = dto.Status,
+                CreatedAt = DateTime.UtcNow
             };
 
             return CreatedAtAction(nameof(GetBooking), new { id = booking.Id }, bookingDTO);

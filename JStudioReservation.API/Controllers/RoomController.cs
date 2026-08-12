@@ -123,10 +123,11 @@ namespace JStudioReservation.API.Controllers
 
             var room = new Room
             {
-                Name = createRoomDTO.Name,
-                PricePerHour = createRoomDTO.PricePerHour,
-                Capacity = createRoomDTO.Capacity,
-                ArtistId = createRoomDTO.ArtistId
+                Name = dto.Name,
+                Capacity = dto.Capacity,
+                PricePerHour = dto.PricePerHour,
+                ArtistId = dto.ArtistId,
+                CreatedAt = DateTime.UtcNow
             };
 
             await _roomRepository.AddAsync(room);

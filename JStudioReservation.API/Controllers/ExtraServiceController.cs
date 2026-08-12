@@ -107,9 +107,10 @@ namespace JStudioReservation.API.Controllers
 
             var service = new ExtraService
             {
-                Name = createDTO.Name,
-                Price = createDTO.Price,
-                RoomId = createDTO.RoomId
+                Name = dto.Name,
+                Price = dto.Price,
+                RoomId = dto.RoomId,
+                CreatedAt = DateTime.UtcNow
             };
 
             await _extraServiceRepository.AddAsync(service);

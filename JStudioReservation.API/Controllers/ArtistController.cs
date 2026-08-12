@@ -81,25 +81,28 @@ namespace JStudioReservation.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ArtistDTO>> CreateArtist([FromBody] CreateArtistDTO createArtistDTO)
         {
-            var artist = new Artist
+            try
             {
-                FullName = createArtistDTO.FullName,
-                Genre = createArtistDTO.Genre,
-                PhoneNumber = createArtistDTO.PhoneNumber
-            };
+                Artist artist = new Artist
+                {
+                    FullName = dto.FullName,
+                    Genre = dto.Genre,
+                    PhoneNumber = dto.PhoneNumber,
+                    CreatedAt = DateTime.UtcNow
 
-            await _artistRepository.AddAsync(artist);
-            await _artistRepository.SaveChangesAsync();
+                };
 
-            var artistDTO = new ArtistDTO
+                _context.Artists.Add(artist);
+                await _context.SaveChangesAsync();
+
+                return Ok(artist);
+            }
+            catch (DbUpdateException ex)
             {
-                Id = artist.Id,
-                FullName = artist.FullName,
-                Genre = artist.Genre,
-                PhoneNumber = artist.PhoneNumber
-            };
-
-            return CreatedAtAction(nameof(GetArtist), new { id = artist.Id }, artistDTO);
+                // Esto te imprimirá en la consola de Visual Studio el mensaje exacto de la base de datos
+                Console.WriteLine(ex.InnerException?.Message);
+                throw;
+            }
         }
 
         [HttpPut("{id}")]
