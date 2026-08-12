@@ -2,6 +2,7 @@
 using JStudioReservation.Domain.Entities;
 using JStudioReservation.API.DTOs;
 using JStudioReservation.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace JStudioReservation.API.Controllers
 {
@@ -85,24 +86,32 @@ namespace JStudioReservation.API.Controllers
             {
                 Artist artist = new Artist
                 {
-                    FullName = dto.FullName,
-                    Genre = dto.Genre,
-                    PhoneNumber = dto.PhoneNumber,
+                    FullName = createArtistDTO.FullName,
+                    Genre = createArtistDTO.Genre,
+                    PhoneNumber = createArtistDTO.PhoneNumber,
                     CreatedAt = DateTime.UtcNow
-
                 };
 
-                _context.Artists.Add(artist);
-                await _context.SaveChangesAsync();
+                
+                await _artistRepository.AddAsync(artist);
+                await _artistRepository.SaveChangesAsync();
 
-                return Ok(artist);
+                var artistDTO = new ArtistDTO
+                {
+                    Id = artist.Id,
+                    FullName = artist.FullName,
+                    Genre = artist.Genre,
+                    PhoneNumber = artist.PhoneNumber
+                };
+
+                return CreatedAtAction(nameof(GetArtist), new { id = artist.Id }, artistDTO);
             }
             catch (DbUpdateException ex)
             {
-                // Esto te imprimirá en la consola de Visual Studio el mensaje exacto de la base de datos
                 Console.WriteLine(ex.InnerException?.Message);
                 throw;
             }
+        
         }
 
         [HttpPut("{id}")]

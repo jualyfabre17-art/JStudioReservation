@@ -3,6 +3,7 @@ using JStudioReservation.Domain.Entities;
 using JStudioReservation.API.DTOs;
 using JStudioReservation.Infrastructure.Repositories;
 
+
 namespace JStudioReservation.API.Controllers
 {
     [Route("api/[controller]")]
@@ -107,9 +108,9 @@ namespace JStudioReservation.API.Controllers
 
             var service = new ExtraService
             {
-                Name = dto.Name,
-                Price = dto.Price,
-                RoomId = dto.RoomId,
+                Name = createDTO.Name,
+                Price = createDTO.Price,
+                RoomId = createDTO.RoomId,
                 CreatedAt = DateTime.UtcNow
             };
 

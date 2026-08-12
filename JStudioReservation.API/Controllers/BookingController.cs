@@ -2,6 +2,8 @@
 using JStudioReservation.Domain.Entities;
 using JStudioReservation.API.DTOs;
 using JStudioReservation.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace JStudioReservation.API.Controllers
 {
@@ -233,13 +235,29 @@ namespace JStudioReservation.API.Controllers
 
             var booking = new Booking
             {
-                ArtistId = dto.ArtistId,
-                RoomId = dto.RoomId,
-                ExtraServiceId = dto.ExtraServiceId,
-                StartTime = dto.StartTime,
-                EndTime = dto.EndTime,
-                Status = dto.Status,
+                ArtistId = createDTO.ArtistId,
+                RoomId = createDTO.RoomId,
+                ExtraServiceId = createDTO.ExtraServiceId,
+                StartTime = createDTO.StartTime,
+                EndTime = createDTO.EndTime,
+                Status = createDTO.Status,
                 CreatedAt = DateTime.UtcNow
+            };
+
+            await _bookingRepository.AddAsync(booking);
+            await _bookingRepository.SaveChangesAsync();
+
+            var bookingDTO = new BookingDTO
+            {
+                Id = booking.Id,
+                ArtistId = booking.ArtistId,
+                ArtistName = artist.FullName,
+                RoomId = booking.RoomId,
+                RoomName = room.Name,
+                ExtraServiceId = booking.ExtraServiceId,
+                StartTime = booking.StartTime,
+                EndTime = booking.EndTime,
+                Status = booking.Status
             };
 
             return CreatedAtAction(nameof(GetBooking), new { id = booking.Id }, bookingDTO);
