@@ -3,6 +3,7 @@ using JStudioReservation.Domain.Entities;
 using JStudioReservation.API.DTOs;
 using JStudioReservation.Infrastructure.Repositories;
 
+
 namespace JStudioReservation.API.Controllers
 {
     [Route("api/[controller]")]
@@ -123,10 +124,10 @@ namespace JStudioReservation.API.Controllers
 
             var room = new Room
             {
-                Name = dto.Name,
-                Capacity = dto.Capacity,
-                PricePerHour = dto.PricePerHour,
-                ArtistId = dto.ArtistId,
+                Name = createRoomDTO.Name,
+                Capacity = createRoomDTO.Capacity,
+                PricePerHour = createRoomDTO.PricePerHour,
+                ArtistId = createRoomDTO.ArtistId,
                 CreatedAt = DateTime.UtcNow
             };
 
