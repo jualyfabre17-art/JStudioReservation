@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7116/api'; // Cambia por tu puerto
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7270/api'; 
 
 export const API_ENDPOINTS = {
     ARTISTS: `${API_BASE_URL}/Artist`,
