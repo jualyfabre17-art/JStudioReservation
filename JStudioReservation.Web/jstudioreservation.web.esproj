@@ -12,7 +12,6 @@
     <Folder Include="src\Components\Modals\" />
     <Folder Include="src\Components\Forms\" />
     <Folder Include="src\Components\Shared\" />
-    <Folder Include="src\Models\" />
     <Folder Include="src\Hooks\" />
     <Folder Include="src\Contexts\" />
     <Folder Include="src\Utils\" />
