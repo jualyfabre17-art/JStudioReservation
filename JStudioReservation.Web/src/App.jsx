@@ -1,122 +1,58 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { NavBar } from './components/Shared/NavBar';
+import { Footer } from './components/Shared/Footer';
+import { Dashboard } from './pages/Dashboard';
+import { ArtistList } from './pages/Artists/ArtistList';
+import { ArtistCreate } from './pages/Artists/ArtistCreate';
+import { ArtistEdit } from './pages/Artists/ArtistEdit';
+import { RoomList } from './pages/Rooms/RoomList';
+import { RoomCreate } from './pages/Rooms/RoomCreate';
+import { RoomEdit } from './pages/Rooms/RoomEdit';
+import { ExtraServiceList } from './pages/ExtraServices/ExtraServiceList';
+import { ExtraServiceCreate } from './pages/ExtraServices/ExtraServiceCreate';
+import { ExtraServiceEdit } from './pages/ExtraServices/ExtraServiceEdit';
+import { BookingList } from './pages/Bookings/BookingList';
+import { BookingCreate } from './pages/Bookings/BookingCreate';
+import { BookingEdit } from './pages/Bookings/BookingEdit';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    return (
+        <Router>
+            <div style={styles.app}>
+                <NavBar />
+                <main style={styles.main}>
+                    <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/artists" element={<ArtistList />} />
+                        <Route path="/artists/create" element={<ArtistCreate />} />
+                        <Route path="/artists/edit/:id" element={<ArtistEdit />} />
+                        <Route path="/rooms" element={<RoomList />} />
+                        <Route path="/rooms/create" element={<RoomCreate />} />
+                        <Route path="/rooms/edit/:id" element={<RoomEdit />} />
+                        <Route path="/extraservices" element={<ExtraServiceList />} />
+                        <Route path="/extraservices/create" element={<ExtraServiceCreate />} />
+                        <Route path="/extraservices/edit/:id" element={<ExtraServiceEdit />} />
+                        <Route path="/bookings" element={<BookingList />} />
+                        <Route path="/bookings/create" element={<BookingCreate />} />
+                        <Route path="/bookings/edit/:id" element={<BookingEdit />} />
+                    </Routes>
+                </main>
+                <Footer />
+            </div>
+        </Router>
+    );
 }
 
-export default App
+const styles = {
+    app: {
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh'
+    },
+    main: {
+        flex: 1
+    }
+};
+
+export default App;
