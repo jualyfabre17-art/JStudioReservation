@@ -11,9 +11,6 @@
   <ItemGroup>
     <Folder Include="src\Hooks\" />
     <Folder Include="src\Contexts\" />
-    <Folder Include="src\Pages\ExtraServices\" />
-    <Folder Include="src\Pages\Bookings\" />
-    <Folder Include="src\Pages\Rooms\" />
     <Folder Include="src\Services\Interfaces\" />
   </ItemGroup>
 </Project>
