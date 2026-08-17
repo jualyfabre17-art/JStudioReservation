@@ -36,6 +36,11 @@ export class BaseApiService {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+
+        if (response.status === 204) {
+            return true;
+        }
+
         return this.handleResponse(response);
     }
 
@@ -43,6 +48,11 @@ export class BaseApiService {
         const response = await fetch(`${this.endpoint}/${id}`, {
             method: 'DELETE'
         });
+
+        if (response.status === 204) {
+            return true;
+        }
+
         return this.handleResponse(response);
     }
 }
