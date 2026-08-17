@@ -45,113 +45,276 @@ export const ArtistForm = ({ initialData = {}, onSubmit, onCancel, isEditing = f
         onSubmit(formData);
     };
 
+    const styles = {
+        container: {
+            maxWidth: '640px',
+            margin: '0 auto',
+            padding: '2.5rem',
+            backgroundColor: '#ffffff',
+            borderRadius: '20px',
+            boxShadow: '0 10px 40px rgba(30, 41, 59, 0.08)',
+            border: '1px solid rgba(226, 232, 240, 0.5)',
+            transition: 'box-shadow 0.3s ease'
+        },
+        title: {
+            fontSize: '1.75rem',
+            fontWeight: '700',
+            color: '#0f172a',
+            marginBottom: '0.5rem',
+            letterSpacing: '-0.02em',
+            fontFamily: "'Inter', 'Segoe UI', sans-serif"
+        },
+        subtitle: {
+            fontSize: '0.95rem',
+            color: '#64748b',
+            marginBottom: '2rem',
+            paddingBottom: '1.5rem',
+            borderBottom: '2px solid #f1f5f9'
+        },
+        form: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.75rem'
+        },
+        field: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.4rem'
+        },
+        label: {
+            fontWeight: '600',
+            color: '#1e293b',
+            fontSize: '0.85rem',
+            letterSpacing: '0.3px',
+            textTransform: 'uppercase',
+            fontFamily: "'Inter', 'Segoe UI', sans-serif"
+        },
+        labelRequired: {
+            color: '#ef4444',
+            marginLeft: '2px'
+        },
+        input: {
+            padding: '0.9rem 1.2rem',
+            border: '2px solid #e2e8f0',
+            borderRadius: '12px',
+            fontSize: '1rem',
+            fontFamily: "'Inter', 'Segoe UI', sans-serif",
+            backgroundColor: '#f8fafc',
+            transition: 'all 0.25s ease',
+            outline: 'none',
+            color: '#0f172a'
+        },
+        inputFocus: {
+            borderColor: '#4f46e5',
+            backgroundColor: '#ffffff',
+            boxShadow: '0 0 0 4px rgba(79, 70, 229, 0.08)'
+        },
+        inputError: {
+            borderColor: '#ef4444',
+            backgroundColor: '#fef2f2'
+        },
+        error: {
+            color: '#ef4444',
+            fontSize: '0.85rem',
+            fontWeight: '500',
+            marginTop: '0.25rem',
+            paddingLeft: '0.25rem'
+        },
+        actions: {
+            display: 'flex',
+            gap: '1rem',
+            justifyContent: 'flex-end',
+            marginTop: '1.5rem',
+            paddingTop: '1.5rem',
+            borderTop: '2px solid #f1f5f9'
+        },
+        cancelButton: {
+            padding: '0.85rem 2rem',
+            backgroundColor: 'transparent',
+            border: '2px solid #e2e8f0',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            color: '#475569',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            fontFamily: "'Inter', 'Segoe UI', sans-serif",
+            transition: 'all 0.2s ease',
+            textTransform: 'uppercase',
+            letterSpacing: '0.3px'
+        },
+        cancelButtonHover: {
+            backgroundColor: '#f1f5f9',
+            borderColor: '#cbd5e1'
+        },
+        submitButton: {
+            padding: '0.85rem 2.5rem',
+            backgroundColor: '#4f46e5',
+            border: 'none',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            color: '#ffffff',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            fontFamily: "'Inter', 'Segoe UI', sans-serif",
+            transition: 'all 0.25s ease',
+            textTransform: 'uppercase',
+            letterSpacing: '0.3px',
+            boxShadow: '0 4px 14px rgba(79, 70, 229, 0.25)'
+        },
+        submitButtonHover: {
+            backgroundColor: '#4338ca',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 6px 20px rgba(79, 70, 229, 0.30)'
+        },
+        
+        helperText: {
+            fontSize: '0.8rem',
+            color: '#94a3b8',
+            marginTop: '0.2rem',
+            paddingLeft: '0.25rem'
+        }
+    };
+
     return (
-        <form onSubmit={handleSubmit} style={styles.form}>
-            <div style={styles.field}>
-                <label style={styles.label}>Nombre Completo *</label>
-                <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    style={{ ...styles.input, borderColor: errors.fullName ? '#ef4444' : '#e2e8f0' }}
-                />
-                {errors.fullName && <span style={styles.error}>{errors.fullName}</span>}
-            </div>
+        <div style={styles.container}>
+            <h2 style={styles.title}>
+                {isEditing ? '✏️ Editar Artista' : '🎤 Nuevo Artista'}
+            </h2>
+            <p style={styles.subtitle}>
+                {isEditing
+                    ? 'Actualiza la información del artista'
+                    : 'Registra un nuevo artista en el estudio'}
+            </p>
 
-            <div style={styles.field}>
-                <label style={styles.label}>Género *</label>
-                <input
-                    type="text"
-                    name="genre"
-                    value={formData.genre}
-                    onChange={handleChange}
-                    style={{ ...styles.input, borderColor: errors.genre ? '#ef4444' : '#e2e8f0' }}
-                />
-                {errors.genre && <span style={styles.error}>{errors.genre}</span>}
-            </div>
+            <form onSubmit={handleSubmit} style={styles.form}>
+                <div style={styles.field}>
+                    <label style={styles.label}>
+                        Nombre completo <span style={styles.labelRequired}>*</span>
+                    </label>
+                    <input
+                        type="text"
+                        name="fullName"
+                        placeholder="Ej: Juan Pérez"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        style={{
+                            ...styles.input,
+                            ...(errors.fullName ? styles.inputError : {}),
+                            ...(document.activeElement === document.querySelector('input[name="fullName"]') ? styles.inputFocus : {})
+                        }}
+                        onFocus={(e) => {
+                            e.target.style.borderColor = '#4f46e5';
+                            e.target.style.backgroundColor = '#ffffff';
+                            e.target.style.boxShadow = '0 0 0 4px rgba(79, 70, 229, 0.08)';
+                        }}
+                        onBlur={(e) => {
+                            if (!errors.fullName) {
+                                e.target.style.borderColor = '#e2e8f0';
+                                e.target.style.backgroundColor = '#f8fafc';
+                                e.target.style.boxShadow = 'none';
+                            }
+                        }}
+                    />
+                    {errors.fullName && <span style={styles.error}>{errors.fullName}</span>}
+                    <span style={styles.helperText}>Máximo 100 caracteres</span>
+                </div>
 
-            <div style={styles.field}>
-                <label style={styles.label}>Teléfono</label>
-                <input
-                    type="text"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                    style={{ ...styles.input, borderColor: errors.phoneNumber ? '#ef4444' : '#e2e8f0' }}
-                />
-                {errors.phoneNumber && <span style={styles.error}>{errors.phoneNumber}</span>}
-            </div>
+                <div style={styles.field}>
+                    <label style={styles.label}>
+                        Género musical <span style={styles.labelRequired}>*</span>
+                    </label>
+                    <input
+                        type="text"
+                        name="genre"
+                        placeholder="Ej: Rock, Pop, Jazz"
+                        value={formData.genre}
+                        onChange={handleChange}
+                        style={{
+                            ...styles.input,
+                            ...(errors.genre ? styles.inputError : {}),
+                            ...(document.activeElement === document.querySelector('input[name="genre"]') ? styles.inputFocus : {})
+                        }}
+                        onFocus={(e) => {
+                            e.target.style.borderColor = '#4f46e5';
+                            e.target.style.backgroundColor = '#ffffff';
+                            e.target.style.boxShadow = '0 0 0 4px rgba(79, 70, 229, 0.08)';
+                        }}
+                        onBlur={(e) => {
+                            if (!errors.genre) {
+                                e.target.style.borderColor = '#e2e8f0';
+                                e.target.style.backgroundColor = '#f8fafc';
+                                e.target.style.boxShadow = 'none';
+                            }
+                        }}
+                    />
+                    {errors.genre && <span style={styles.error}>{errors.genre}</span>}
+                    <span style={styles.helperText}>Máximo 50 caracteres</span>
+                </div>
 
-            <div style={styles.actions}>
-                <button type="button" onClick={onCancel} style={styles.cancelButton}>
-                    Cancelar
-                </button>
-                <button type="submit" style={styles.submitButton}>
-                    {isEditing ? 'Actualizar' : 'Crear'}
-                </button>
-            </div>
-        </form>
+                <div style={styles.field}>
+                    <label style={styles.label}>Teléfono de contacto</label>
+                    <input
+                        type="text"
+                        name="phoneNumber"
+                        placeholder="Ej: 809-555-1234"
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        style={{
+                            ...styles.input,
+                            ...(errors.phoneNumber ? styles.inputError : {}),
+                            ...(document.activeElement === document.querySelector('input[name="phoneNumber"]') ? styles.inputFocus : {})
+                        }}
+                        onFocus={(e) => {
+                            e.target.style.borderColor = '#4f46e5';
+                            e.target.style.backgroundColor = '#ffffff';
+                            e.target.style.boxShadow = '0 0 0 4px rgba(79, 70, 229, 0.08)';
+                        }}
+                        onBlur={(e) => {
+                            if (!errors.phoneNumber) {
+                                e.target.style.borderColor = '#e2e8f0';
+                                e.target.style.backgroundColor = '#f8fafc';
+                                e.target.style.boxShadow = 'none';
+                            }
+                        }}
+                    />
+                    {errors.phoneNumber && <span style={styles.error}>{errors.phoneNumber}</span>}
+                    <span style={styles.helperText}>Opcional. Máximo 20 caracteres</span>
+                </div>
+
+                <div style={styles.actions}>
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        style={styles.cancelButton}
+                        onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#f1f5f9';
+                            e.target.style.borderColor = '#cbd5e1';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'transparent';
+                            e.target.style.borderColor = '#e2e8f0';
+                        }}
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="submit"
+                        style={styles.submitButton}
+                        onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#4338ca';
+                            e.target.style.transform = 'translateY(-2px)';
+                            e.target.style.boxShadow = '0 6px 20px rgba(79, 70, 229, 0.30)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#4f46e5';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 4px 14px rgba(79, 70, 229, 0.25)';
+                        }}
+                    >
+                        {isEditing ? 'Actualizar' : 'Crear Artista'}
+                    </button>
+                </div>
+            </form>
+        </div>
     );
-};
-
-const styles = {
-    form: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.5rem',
-        maxWidth: '500px',
-        margin: '0 auto',
-        padding: '2rem',
-        backgroundColor: '#ffffff',
-        borderRadius: '8px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-    },
-    field: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.25rem'
-    },
-    label: {
-        fontWeight: '500',
-        color: '#1e293b',
-        fontSize: '0.9rem'
-    },
-    input: {
-        padding: '0.75rem',
-        border: '1px solid #e2e8f0',
-        borderRadius: '6px',
-        fontSize: '1rem',
-        transition: 'border-color 0.2s'
-    },
-    error: {
-        color: '#ef4444',
-        fontSize: '0.85rem',
-        marginTop: '0.25rem'
-    },
-    actions: {
-        display: 'flex',
-        gap: '1rem',
-        justifyContent: 'flex-end',
-        marginTop: '0.5rem'
-    },
-    cancelButton: {
-        padding: '0.75rem 2rem',
-        backgroundColor: '#e2e8f0',
-        border: 'none',
-        borderRadius: '6px',
-        cursor: 'pointer',
-        color: '#1e293b',
-        fontSize: '1rem'
-    },
-    submitButton: {
-        padding: '0.75rem 2rem',
-        backgroundColor: '#4f46e5',
-        border: 'none',
-        borderRadius: '6px',
-        cursor: 'pointer',
-        color: '#ffffff',
-        fontSize: '1rem',
-        transition: 'background-color 0.2s'
-    }
 };
